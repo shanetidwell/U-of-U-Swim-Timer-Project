@@ -1,8 +1,9 @@
 import PyQt5.QtWidgets as qw
 import sys
-import serial as s
+import serial
+import time
 
-arduino = s.Serial("COM5", 9600)
+arduino = serial.Serial("COM5", 9600)
 
 #Wait for Arduino to be ready to go
 while arduino.inWaiting() <= 0:
@@ -24,8 +25,18 @@ class Timing_GUI(qw.QWidget):
         layout = qw.QVBoxLayout()
         button = qw.QPushButton("Go!")
         layout.addWidget(button)
-        self.label = qw.QLabel("Time: ")
-        layout.addWidget(self.label)
+        self.label1 = qw.QLabel(" ")
+        layout.addWidget(self.label1)
+        self.label2 = qw.QLabel(" ")
+        layout.addWidget(self.label2)
+        self.label3 = qw.QLabel(" ")
+        layout.addWidget(self.label3)
+        self.label4 = qw.QLabel(" ")
+        layout.addWidget(self.label4)
+        self.label5 = qw.QLabel(" ")
+        layout.addWidget(self.label5)
+        self.label6 = qw.QLabel(" ")
+        layout.addWidget(self.label6)
         self.button2 = qw.QPushButton("Close Serial Port")
         layout.addWidget(self.button2)
         
@@ -33,22 +44,39 @@ class Timing_GUI(qw.QWidget):
         button.clicked.connect(self.sendSignal)
         self.button2.clicked.connect(self.closePort)
         
+        #Set geometry and layout and show GUI
         self.setGeometry(100, 100, 500, 200)
         self.setLayout(layout)
         self.show()
         
     def sendSignal(self):
+        t1 = time.perf_counter()
         """ Send signal to Arduino to start time """
-        print("Writing Message...")
-        self.label.setText('Time: 123456789')
+        #print("Writing Message...")
         arduino.write(str.encode("1"))
         while 1:
+            t = time.perf_counter() - t1
+            self.label1.setText("Lane 1: {:.2f} seconds".format(t))
+            self.label2.setText("Lane 2: {:.2f} seconds".format(t))
+            self.label3.setText("Lane 3: {:.2f} seconds".format(t))
+            self.label4.setText("Lane 4: {:.2f} seconds".format(t))
+            self.label5.setText("Lane 5: {:.2f} seconds".format(t))
+            self.label6.setText("Lane 6: {:.2f} seconds".format(t))
+            qw.QApplication.processEvents()
             if (arduino.inWaiting() > 0):
                 self.Data = bytes.decode(arduino.readline())
-                print(self.Data)
-                self.label.setText("Time: " + str(self.Data))
-                break        
-
+                self.label1.setText("Lane 1 Finish: {:.2f} seconds".format(int(self.Data)/1000.0))
+                break   
+        while 1:
+            t = time.perf_counter() - t1
+            #self.label1.setText("Lane 1: {:.2f} seconds".format(t))
+            self.label2.setText("Lane 2: {:.2f} seconds".format(t))
+            self.label3.setText("Lane 3: {:.2f} seconds".format(t))
+            self.label4.setText("Lane 4: {:.2f} seconds".format(t))
+            self.label5.setText("Lane 5: {:.2f} seconds".format(t))
+            self.label6.setText("Lane 6: {:.2f} seconds".format(t))
+            qw.QApplication.processEvents()
+  
     def closePort(self):
         arduino.close()
         self.button2.setText("Port Closed")
