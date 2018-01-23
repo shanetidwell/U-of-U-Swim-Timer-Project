@@ -65,8 +65,12 @@ class Timing_GUI(qw.QWidget):
             qw.QApplication.processEvents()
             if (arduino.inWaiting() > 0):
                 self.Data = bytes.decode(arduino.readline())
+                self.Data = self.Data.split()
+                lane      = self.Data[0]
+                seconds   = self.Data[1]
+                hund      = self.Data[3]
                 self.label1.setText("Lane 1 Finish: {:.2f} seconds".format(int(self.Data)/1000.0))
-                break   
+                break      
         while 1:
             t = time.perf_counter() - t1
             #self.label1.setText("Lane 1: {:.2f} seconds".format(t))

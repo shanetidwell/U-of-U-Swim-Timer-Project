@@ -12,7 +12,7 @@ int LED = 30;
 
 RF24 radio(7, 8);
 
-const byte rxAddr[6] = "00001";
+const uint64_t rxAddr = 0xF0F0F0F0E1LL;
 
 void setup()
 {
@@ -23,10 +23,9 @@ void setup()
   Serial.begin(9600);
   
   radio.begin();
-  //radio.openReadingPipe(0, rxAddr);
-  
-  //radio.startListening();
-  radio.setRetries(15,15);
+  radio.setDataRate(RF24_250KBPS);
+  radio.setRetries(8,15);
+  radio.openReadingPipe(1, rxAddr);
   radio.openWritingPipe(rxAddr);
   radio.stopListening();
   
@@ -60,7 +59,7 @@ void loop()
   //After Sending Stuff, setup radio for listening
   digitalWrite(LED, LOW);
   
-  radio.openReadingPipe(0, rxAddr);
+  
   radio.startListening();
 
   //Listening for crap to come in
@@ -68,14 +67,15 @@ void loop()
     if (radio.available())
       {
       //char t[32] = {0};
-      unsigned int a = 0;
-      radio.read(&a, sizeof(a));
+      unsigned long receivedMessage[3];
+      radio.read(&receivedMessage, sizeof(receivedMessage));
       digitalWrite(LED, HIGH);
       
       //t2 = millis() - t1;
-
+      String messageToSend = "";
+      messageToSend = (String)receivedMessage[0] + " " + (String)receivedMessage[1] + " " + (String)receivedMessage[2];
       //Serial.print("Shane Time = ");
-      Serial.println(a);
+      Serial.println(messageToSend);
       //Serial.print("My Time = ");
       //Serial.println(t2);
       break;
